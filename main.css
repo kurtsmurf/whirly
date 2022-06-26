@@ -1,0 +1,33 @@
+* {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  padding: 4rem;
+  display: grid;
+  gap: 4rem;
+  place-items: center;
+  background: hsl(var(--hue), 12%, 12%);
+}
+
+svg {
+  --color: hsl(var(--hue), 50%, 50%);
+
+  stroke: var(--color);
+  max-height: min(70vh, 70vw);
+}
+
+.indicator {
+  transform: rotate(var(--rotation));
+  stroke: var(--color);
+  stroke-linecap: round;
+}
+
+.guide {
+  stroke: var(--color);
+  stroke-width: 0.1;
+  stroke-dasharray: 0.4;
+  fill: none;
+}
