@@ -16,18 +16,26 @@ svg {
   --color: hsl(var(--hue), 50%, 50%);
   stroke: var(--color);
   max-height: min(70vh, 70vw);
+  filter: blur(0.5px);
 }
 
 .indicator {
-  transform: rotate(var(--rotation));
   stroke: var(--color);
-  stroke-linecap: round;
+  transform: rotate(var(--rotation));
+}
+
+svg * {
+  stroke: var(--color);
+  filter: drop-shadow(0px 0px 1px hsl(var(--hue) 20% 10%));
 }
 
 .guide {
-  stroke: var(--color);
-  stroke-width: 0.1;
-  stroke-dasharray: 0.4;
+  stroke: hsl(calc(var(--hue) - 180) 50% 50%);
+  stroke-dasharray: 0.2;
+  stroke-width: 0.2;
+  display: none;
+}
+
+circle {
   fill: none;
-  /* display: none; */
 }
