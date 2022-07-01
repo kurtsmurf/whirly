@@ -4,83 +4,71 @@
 document.documentElement.style.setProperty("--hue", `${Math.random() * 360}`);
 
 // Update rotation on slider input
-document.querySelector('#rotation-range').addEventListener('input', e => {
+document.querySelector("#rotation-range").addEventListener("input", (e) => {
   // @ts-ignore: must cast e.target to HTMLInputElement
   const val = parseFloat(e.target.value);
-
-  bufferSource?.playbackRate.setValueAtTime(val, audioContext.currentTime)
-  positionBufferSource?.playbackRate.setValueAtTime(val, audioContext.currentTime)
-
-})
-
+  bufferSource?.playbackRate.setValueAtTime(val, audioContext.currentTime);
+});
 
 // playback position hack:
 // https://github.com/WebAudio/web-audio-api/issues/2397#issuecomment-459514360
 
 const audioContext = new AudioContext();
 
-let myAudioBuffer;
-let positionBuffer;
 let bufferSource;
-let positionBufferSource;
-let analyser;
-
-
+let timelineReader;
 
 const connectFile = () => {
-  document.documentElement.removeEventListener('click', connectFile);
-  fetch('./wheh.mp3')
-    .then(response => response.arrayBuffer())
-    .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
-    .then(audioBuffer => {
-      myAudioBuffer = audioBuffer;
+  document.documentElement.removeEventListener("click", connectFile);
+  fetch("./wheh.mp3")
+    .then((response) => response.arrayBuffer())
+    .then((arrayBuffer) => audioContext.decodeAudioData(arrayBuffer))
+    .then((audioBuffer) => {
 
-      positionBuffer = new AudioBuffer({
-        length: myAudioBuffer.length,
-        sampleRate: myAudioBuffer.sampleRate,
-        numberOfChannels: 1,
-      })
+      const spicyBuffer = audioContext.createBuffer(
+        3,
+        audioBuffer.length,
+        audioBuffer.sampleRate,
+      );
 
-      positionBuffer.copyToChannel(
-        new Float32Array([...new Array(positionBuffer.length)]
-          .map((_, i) => i / positionBuffer.length)),
-        0
-      )
+      const timeline = new Float32Array(audioBuffer.length);
+      timeline.forEach((_, i) => timeline[i] = i / timeline.length);
 
-      bufferSource = audioContext.createBufferSource()
-      bufferSource.buffer = audioBuffer
-      bufferSource.loop = true
-      bufferSource.start()
+      spicyBuffer.copyToChannel(audioBuffer.getChannelData(0), 0);
+      spicyBuffer.copyToChannel(audioBuffer.getChannelData(1), 1);
+      spicyBuffer.copyToChannel(timeline, 2);
 
-      positionBufferSource = audioContext.createBufferSource()
-      positionBufferSource.buffer = positionBuffer
-      positionBufferSource.loop = true
-      positionBufferSource.start()
+      bufferSource = audioContext.createBufferSource();
+      bufferSource.buffer = spicyBuffer;
+      bufferSource.loop = true;
+      bufferSource.start();
 
-      const cut = audioContext.createGain()
-      cut.gain.value = 0
+      const splitter = audioContext.createChannelSplitter();
+      const merger = audioContext.createChannelMerger();
 
-      analyser = audioContext.createAnalyser()
+      bufferSource.connect(splitter);
 
-      bufferSource.connect(audioContext.destination)
-      positionBufferSource
-        .connect(analyser)
-        .connect(cut)
-        .connect(audioContext.destination)
+      splitter.connect(merger, 0, 0);
+      splitter.connect(merger, 1, 1);
+
+      timelineReader = audioContext.createAnalyser();
+      splitter.connect(timelineReader, 2);
+
+      merger.connect(audioContext.destination);
 
       tick();
-    })
-}
+    });
+};
 
-document.documentElement.addEventListener('click', connectFile);
+document.documentElement.addEventListener("click", connectFile);
+
+const sampleHolder = new Float32Array(1);
 
 const tick = () => {
-  const samples = new Float32Array(1);
-  analyser.getFloatTimeDomainData(samples);
+  timelineReader.getFloatTimeDomainData(sampleHolder);
+  const [progress] = sampleHolder;
 
-  const progress = samples[0];
-
-  const rotation = `${progress * 360}deg`
-  document.documentElement.style.setProperty('--rotation', rotation)
+  const rotation = `${progress * 360}deg`;
+  document.documentElement.style.setProperty("--rotation", rotation);
   requestAnimationFrame(tick);
-}
+};
