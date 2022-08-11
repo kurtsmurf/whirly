@@ -1,33 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>whirly</title>
+    <link rel="stylesheet" href="main.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>whirly</title>
-  <link rel="stylesheet" href="main.css">
-</head>
+  <body>
+    <svg viewbox="-16 -16 32 32">
+      <circle cx="0" cy="0" r="8" />
+      <path class="indicator" d="M 0 -4.5 V -11.5" />
+      <path class="guide" d="m -16 0 h 32" />
+      <path class="guide" d="m 0 -16 v 32" />
+    </svg>
+    <input
+      type="range"
+      name="rotation"
+      id="rotation-range"
+      min="0"
+      max="3"
+      step="0.01"
+      value="1"
+    />
+  </body>
 
-<body>
-  <svg viewbox="-16 -16 32 32">
-    <circle cx="0" cy="0" r="8" />
-    <path class="indicator" d="M 0 -4.5 V -11.5"/>
-    <path class="guide" d="m -16 0 h 32"/>
-    <path class="guide" d="m 0 -16 v 32"/>
-  </svg>
-  <input
-    type="range"
-    name="rotation"
-    id="rotation-range"
-    min="0"
-    max="3"
-    step="0.1"
-    value="1"
-  >
-</body>
-
-<script src="src/index.js" type="module"></script>
-
+  <script src="src/index.js" type="module"></script>
 </html>
-

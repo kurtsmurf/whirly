@@ -24,7 +24,7 @@ const connectFile = () => {
       bufferSource = new PlaybackPositionNode(audioContext);
       bufferSource.buffer = audioBuffer;
       bufferSource.loop = true;
-      bufferSource.connect(audioContext.destination)
+      bufferSource.connect(audioContext.destination);
       bufferSource.start();
 
       tick();
@@ -38,7 +38,7 @@ const sampleHolder = new Float32Array(1);
 const tick = () => {
   document.documentElement.style.setProperty(
     "--rotation",
-    `${bufferSource.playbackPosition * 360}deg`,
+    `${bufferSource.playbackPosition * 360}deg`
   );
   requestAnimationFrame(tick);
 };
