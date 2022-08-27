@@ -2,43 +2,64 @@
 
 import { PlaybackPositionNode } from "./PlaybackPositionNode.js";
 
-// Randomize hue
-document.documentElement.style.setProperty("--hue", `${Math.random() * 360}`);
-
-// Update rotation on slider input
-document.querySelector("#rotation-range").addEventListener("input", (e) => {
-  // @ts-ignore: must cast e.target to HTMLInputElement
-  const val = parseFloat(e.target.value);
-  bufferSource?.playbackRate.setValueAtTime(val, audioContext.currentTime);
-});
-
 const audioContext = new AudioContext();
 let bufferSource;
 
-const connectFile = () => {
-  document.documentElement.removeEventListener("click", connectFile);
-  fetch("./wheh.mp3")
-    .then((response) => response.arrayBuffer())
-    .then((arrayBuffer) => audioContext.decodeAudioData(arrayBuffer))
-    .then((audioBuffer) => {
-      bufferSource = new PlaybackPositionNode(audioContext);
-      bufferSource.buffer = audioBuffer;
-      bufferSource.loop = true;
-      bufferSource.connect(audioContext.destination);
-      bufferSource.start();
+// wiring up range slider to playback rate
+{
+  const floatOfEvent = (e) => parseFloat(e.target.value);
 
-      tick();
-    });
-};
+  const updatePlaybackRate = (rate) =>
+    bufferSource?.playbackRate.setValueAtTime(rate, audioContext.currentTime);
 
-document.documentElement.addEventListener("click", connectFile);
+  document
+    .querySelector("#rotation-range")
+    .addEventListener("input", (e) => updatePlaybackRate(floatOfEvent(e)));
+}
 
-const sampleHolder = new Float32Array(1);
+// wiring up playback position to rotation of indicator and starting audio playback
+{
+  const updateRotation = () => {
+    document.documentElement.style.setProperty(
+      "--rotation",
+      `${bufferSource.playbackPosition * 360}deg`
+    );
+  };
 
-const tick = () => {
-  document.documentElement.style.setProperty(
-    "--rotation",
-    `${bufferSource.playbackPosition * 360}deg`
-  );
-  requestAnimationFrame(tick);
-};
+  const tick = () => {
+    updateRotation();
+    requestAnimationFrame(tick);
+  };
+
+  const nodeOfAudioBuffer = (audioBuffer) => {
+    const ppNode = new PlaybackPositionNode(audioContext);
+    ppNode.buffer = audioBuffer;
+    ppNode.loop = true;
+    return ppNode;
+  };
+
+  const start = (audioBuffer) => {
+    bufferSource = nodeOfAudioBuffer(audioBuffer);
+    bufferSource.connect(audioContext.destination);
+    bufferSource.start();
+    tick();
+  };
+
+  const audioBufferOfResponse = (response) =>
+    response
+      .arrayBuffer()
+      .then((arrayBuffer) => audioContext.decodeAudioData(arrayBuffer));
+
+  const connectFile = () =>
+    fetch("./wheh.mp3").then(audioBufferOfResponse).then(start);
+
+  const init = () => {
+    document.documentElement.removeEventListener("click", init);
+    connectFile();
+  };
+
+  document.documentElement.addEventListener("click", init);
+}
+
+// randomizing hue
+document.documentElement.style.setProperty("--hue", `${Math.random() * 360}`);
