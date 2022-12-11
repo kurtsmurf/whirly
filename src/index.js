@@ -5,7 +5,7 @@ import { PlaybackPositionNode } from "./PlaybackPositionNode.js";
 const audioContext = new AudioContext();
 let bufferSource;
 
-// wiring up range slider to playback rate
+// wire up range slider to playback rate
 {
   const floatOfEvent = (e) => parseFloat(e.target.value);
 
@@ -17,12 +17,12 @@ let bufferSource;
     .addEventListener("input", (e) => updatePlaybackRate(floatOfEvent(e)));
 }
 
-// wiring up playback position to rotation of indicator and starting audio playback
+// wire up playback position to rotation of indicator
 {
   const updateRotation = () => {
     document.documentElement.style.setProperty(
       "--rotation",
-      `${bufferSource.playbackPosition * 360}deg`
+      `${bufferSource?.playbackPosition * 360}deg`,
     );
   };
 
@@ -31,6 +31,11 @@ let bufferSource;
     requestAnimationFrame(tick);
   };
 
+  tick();
+}
+
+// load file and start
+{
   const nodeOfAudioBuffer = (audioBuffer) => {
     const ppNode = new PlaybackPositionNode(audioContext);
     ppNode.buffer = audioBuffer;
@@ -42,7 +47,6 @@ let bufferSource;
     bufferSource = nodeOfAudioBuffer(audioBuffer);
     bufferSource.connect(audioContext.destination);
     bufferSource.start();
-    tick();
   };
 
   const audioBufferOfResponse = (response) =>
@@ -50,12 +54,12 @@ let bufferSource;
       .arrayBuffer()
       .then((arrayBuffer) => audioContext.decodeAudioData(arrayBuffer));
 
-  const connectFile = () =>
+  const loadAndPlayAudio = () =>
     fetch("./wheh.mp3").then(audioBufferOfResponse).then(start);
 
   const init = () => {
     document.documentElement.removeEventListener("click", init);
-    connectFile();
+    loadAndPlayAudio();
   };
 
   document.documentElement.addEventListener("click", init);

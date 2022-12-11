@@ -33,7 +33,7 @@ export class PlaybackPositionNode {
     for (let index = 0; index < audioBuffer.numberOfChannels; index++) {
       this._bufferSource.buffer.copyToChannel(
         audioBuffer.getChannelData(index),
-        index
+        index,
       );
     }
 
